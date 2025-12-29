@@ -1,34 +1,34 @@
 import streamlit as st
-import google.generativeai as genai
+from groq import Groq
 
-st.set_page_config(page_title="Olympiad Coach", layout="centered")
-st.title("🏆 OSK Logic Coach")
+st.set_page_config(page_title="OSK Coach", layout="centered")
+st.title("🏆 OSK Math Logic Coach")
 
-# Sidebar for the API Key
-api_key = st.sidebar.text_input("Enter Google API Key", type="password")
+# Use a sidebar for the NEW Groq Key
+api_key = st.sidebar.text_input("Enter Groq API Key (gsk_...)", type="password")
 
 if api_key:
     try:
-        genai.configure(api_key=api_key)
+        client = Groq(api_key=api_key)
         
-        # This code asks Google: "What models am I allowed to use?"
-        # It fixes the '404' and 'None of the models responding' error
-        models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+        # This is the 'beast' model for logic
+        model_name = "llama-3.3-70b-versatile"
         
-        # We pick the best one available (Gemini 2.0 or 3 if available)
-        best_model = "models/gemini-2.0-flash" if "models/gemini-2.0-flash" in models else models[0]
-        
-        model = genai.GenerativeModel(best_model)
-        
-        user_input = st.text_input(f"Ask a math question (Using: {best_model})")
+        user_input = st.text_input("Explain your logic for an OSK problem:")
         
         if user_input:
-            with st.spinner('Thinking...'):
-                response = model.generate_content(user_input)
-                st.subheader("Coach's Hint:")
-                st.write(response.text)
+            with st.spinner('Coach is calculating...'):
+                chat_completion = client.chat.completions.create(
+                    messages=[
+                        {"role": "system", "content": "You are a Math Olympiad Coach. Use Socratic method. Give hints, not answers."},
+                        {"role": "user", "content": user_input}
+                    ],
+                    model=model_name,
+                )
+                st.markdown("### 💡 Coach's Hint")
+                st.write(chat_completion.choices[0].message.content)
                 
     except Exception as e:
         st.error(f"Error: {e}")
 else:
-    st.info("Paste your key in the sidebar. Get it at aistudio.google.com")
+    st.info("Paste your Groq Key to start. No money required.")
