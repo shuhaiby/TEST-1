@@ -12,7 +12,7 @@ if api_key:
     try:
         # 3. Setup Gemini
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash') # Using 1.5 for stability
+        model = genai.GenerativeModel('gemini-2.0-flash') # Using 1.5 for stability
         
         # 4. Simple Input
         user_input = st.text_input("Ask a math question:")
