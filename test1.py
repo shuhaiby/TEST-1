@@ -20,7 +20,7 @@ if api_key:
             with st.spinner('Coach is calculating...'):
                 chat_completion = client.chat.completions.create(
                     messages=[
-                        {"role": "system", "content": "You are a Math Olympiad Coach. Use Socratic method. Give hints, not answers, give number logic, give all the theorem needed to solve the problem."},
+                        {"role": "system", "content": "You are a Math Olympiad Coach. Use Socratic method. Give hints, not answers, give number logic, give all the theorem names needed to solve the problem."},
                         {"role": "user", "content": user_input}
                     ],
                     model=model_name,
