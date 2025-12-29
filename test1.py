@@ -1,39 +1,29 @@
 import streamlit as st
 import google.generativeai as genai
 
-st.set_page_config(page_title="Olympiad Trainer", layout="centered")
+# 1. Basic UI Setup
 st.title("🏆 OSK Logic Coach")
+st.write("If you see this, the app is working correctly.")
 
-# Securely get the API Key from a text input
-api_key = st.sidebar.text_input("Enter Google API Key", type="password")
+# 2. Sidebar for the Key
+api_key = st.sidebar.text_input("Paste Google API Key Here", type="password")
 
 if api_key:
-    genai.configure(api_key=api_key)
-    # Using Gemini 2.0 Flash - The fastest model available right now
-    model = genai.GenerativeModel('gemini-2.0-flash')
-
-    if "chat" not in st.session_state:
-        st.session_state.chat = model.start_chat(history=[])
-        # Initial System Instruction
-        st.session_state.chat.send_message(
-            "You are a Math Olympiad Coach. Tone: Direct. Method: Socratic (hints only). "
-            "Help the student prepare for OSK/OSP/OSN. Never give the answer first."
-        )
-
-    # Display chat history
-    for message in st.session_state.chat.history:
-        role = "assistant" if message.role == "model" else "user"
-        with st.chat_message(role):
-            st.markdown(message.parts[0].text)
-
-    # User Input
-    if prompt := st.chat_input("Ask a math problem or describe your logic..."):
-        with st.chat_message("user"):
-            st.markdown(prompt)
+    try:
+        # 3. Setup Gemini
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-1.5-flash') # Using 1.5 for stability
         
-        with st.chat_message("assistant"):
-            # This 'stream=True' makes it feel instant
-            response = st.session_state.chat.send_message(prompt, stream=True)
-            full_response = st.write_stream(chunk.text for chunk in response)
+        # 4. Simple Input
+        user_input = st.text_input("Ask a math question:")
+        
+        if user_input:
+            with st.spinner('Thinking...'):
+                response = model.generate_content(user_input)
+                st.subheader("Coach's Hint:")
+                st.write(response.text)
+                
+    except Exception as e:
+        st.error(f"Something went wrong: {e}")
 else:
-    st.info("Please enter your API Key from Google AI Studio to start.")
+    st.info("Waiting for API Key... Get it from aistudio.google.com")
